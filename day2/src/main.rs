@@ -48,5 +48,5 @@ fn p2() -> u32 {
 }
 
 fn main() {
-    println!("{}", p2());
+    println!("{}", p1());
 }
