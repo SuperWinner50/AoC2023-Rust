@@ -1,17 +1,15 @@
 static INPUT: &str = include_str!("input.txt");
 
 fn p1() {
-    let re_seeds = regex::Regex::new(r"\d+").unwrap();
-    let re_ranges = regex::Regex::new(r"(\d+) (\d+) (\d+)").unwrap();
-
     let mut it = INPUT.split(":").skip(1);
-    let seeds: Vec<_> = re_seeds.find_iter(it.next().unwrap())
-        .map(|c| c.as_str().parse::<u64>().unwrap())
-        .collect();
-    
-    let maps: Vec<Vec<_>> = it
-        .map(|s| re_ranges.captures_iter(s).map(|c| [1, 2, 3].map(|i| c.get(i).unwrap().as_str().parse::<u64>().unwrap())).collect())
-        .collect();
+    let seeds = it.next().unwrap().trim_matches(|c: char| !c.is_ascii_digit()).split(" ").map(|n| n.parse::<u64>().unwrap()).collect::<Vec<_>>();
+
+    let maps: Vec<Vec<_>> = it.map(|s| 
+        s.trim_matches(|c: char| !c.is_ascii_digit()).lines().map(|l| {
+            let mut line_it = l.split(" ");
+            [1, 2, 3].map(|_| line_it.next().unwrap().parse::<u64>().unwrap())
+        }).collect::<Vec<_>>()
+    ).collect();
 
     let x = seeds.into_iter().map(|seed| {
         let mut v = seed;
@@ -31,20 +29,17 @@ fn p1() {
     println!("{x}");
 }
 
-fn p2() {
-    let re_seeds = regex::Regex::new(r"(\d+) (\d+)").unwrap();
-    let re_ranges = regex::Regex::new(r"(\d+) (\d+) (\d+)").unwrap();
-
+fn p2() {    
     let mut it = INPUT.split(":").skip(1);
-    let mut v_ranges: Vec<_> = re_seeds.captures_iter(it.next().unwrap())
-        .map(|c| [1, 2].map(|i| c.get(i).unwrap().as_str().parse::<u64>().unwrap()))
-        .collect();
-    
-    let maps: Vec<Vec<_>> = it
-        .map(|s| re_ranges.captures_iter(s).map(|c| [1, 2, 3].map(|i| c.get(i).unwrap().as_str().parse::<u64>().unwrap())).collect())
-        .collect();
+    let seeds = it.next().unwrap().trim_matches(|c: char| !c.is_ascii_digit()).split(" ").map(|n| n.parse::<u64>().unwrap()).collect::<Vec<_>>();
+    let seeds = seeds.chunks_exact(2).map(|c| [c[0], c[1]]).collect::<Vec<_>>();
 
-    for mut map in maps {
+    let x = it.fold(seeds, |v_ranges, s| {
+        let mut map = s.trim_matches(|c: char| !c.is_ascii_digit()).lines().map(|l| {
+            let mut line_it = l.split(" ");
+            [1, 2, 3].map(|_| line_it.next().unwrap().parse::<u64>().unwrap())
+        }).collect::<Vec<_>>();
+
         map.sort_by_key(|r| r[1]);
 
         let mut i = 0;
@@ -80,13 +75,12 @@ fn p2() {
             }
         }
 
-        v_ranges = new_ranges;
-    }
+        new_ranges
+    }).into_iter().map(|r| r[0]).min().unwrap();
 
-    let smallest = v_ranges.into_iter().map(|r| r[0]).min().unwrap();
-    println!("{}", smallest);
+    println!("{x}");
 }
 
 fn main() {
-    p2();
+    p1();
 }
